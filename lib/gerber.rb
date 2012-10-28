@@ -252,7 +252,7 @@ class Gerber
 		polarity, x, y, i, j = $1, $3, $4, $5, $6
 		raise ParseError, "KO not supported"
 	    when 'LN'
-		/^LN([:print:])/ =~ s
+		/^LN([[:print:]]+)\*/ =~ s
 		new_layer.name = $1
 	    when 'LP'
 		/^LP(C|D)/ =~ s

@@ -23,6 +23,7 @@ describe Gerber do
 
 	it "must have only 1 layer" do
 	    gerber.layers.count.must_equal 1
+	    gerber.layers.last.name.must_equal "BOXES"
 	end
     end
 

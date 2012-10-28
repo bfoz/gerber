@@ -37,7 +37,7 @@ class Gerber
 	@new_layer_polarity = :dark
     end
 
-    # Apply the configureg units to a number
+    # Apply the configured units to a number
     def apply_units(a)
 	raise ParseError, "Units must be set before specifying dimensions" unless @units
 	return nil unless a
@@ -110,8 +110,10 @@ class Gerber
 		    raise ParseError,"Unrecognized block: \"#{block}\""
 	    end
 	end
+
 	# FIXME apply any @rotation
-	# FIXME Remove empty layers
+
+	@layers = @layer_parsers.map {|parser| parser.layer }.select {|layer| !layer.empty? }
 	self
     end
 

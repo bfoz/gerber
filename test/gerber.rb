@@ -14,8 +14,16 @@ describe Gerber do
 	Gerber.read('test/gerber/wikipedia.gerber')
     end
 
-    it "must read Example 1 from the specification" do
-	Gerber.read('test/gerber/two_boxes.gerber')
+    describe "when reading Example 1 from the specification" do
+	let(:gerber) { Gerber.read('test/gerber/two_boxes.gerber') }
+
+	it "must create a Gerber object" do
+	    gerber.must_be_instance_of(Gerber)
+	end
+
+	it "must have only 1 layer" do
+	    gerber.layers.count.must_equal 1
+	end
     end
 
     it "must read Example 2 from the specification" do

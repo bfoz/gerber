@@ -9,18 +9,15 @@ class Gerber
 	    attr_reader :position
 	    attr_reader :quadrant_mode
 
-	    attr_accessor :eof
-
 	    def initialize(*args)
 		super
 
-		self.eof = false
 		@coordinate_mode = :absolute
-		@quadrant_mode = :single
 		@dcode = 2	# off
 		@gcode = 1	# linear interpolation
 		@layer = Gerber::Layer.new
 		@position = Point[0,0]
+		@quadrant_mode = :single
 		@repeat = Vector[1,1]
 		@step = Vector[0,0]
 		@units = nil
@@ -196,11 +193,6 @@ class Gerber
 		    self << arc
 		    @position = arc.last
 		end
-	    end
-
-	    def parse_mcode(m)
-		raise ParseError, "Invalid M code: #{m}" unless m
-		self.eof = true if m.to_i == 2
 	    end
 
 	    def apply_units(a)

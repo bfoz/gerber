@@ -17,10 +17,12 @@ class Gerber
     attr_accessor :zero_omission, :absolute
 
     attr_reader :apertures, :layers
+    attr_reader :eof
     attr_reader :total_places
 
     def initialize
 	@apertures = []
+	@eof = false
 	@layers = []
 	@layer_parsers = []
 	@axis_mirror = {:a => 1, :b => 1}   # 1 => not mirrored, -1 => mirrored
@@ -82,7 +84,7 @@ class Gerber
 	input.each('*') do |block|
 	    block.strip!
 	    next if !block || block.empty?
-	    raise ParseError, "Found blocks after M02" if current_layer.eof
+	    raise ParseError, "Found blocks after M02" if self.eof
 	    case block
 		when /^%AM/ # Special handling for aperture macros
 		    parse_parameter((block + input.gets('%')).gsub(/[\n%]/,''))
@@ -91,7 +93,9 @@ class Gerber
 		when /^D(\d{2,3})/
 		    current_layer.parse_dcode(block)
 		when /^M0(0|1|2)/
-		    current_layer.parse_mcode($1)
+		    mcode = $1
+		    raise ParseError, "Invalid M code: #{m}" unless mcode
+		    @eof = true if mcode.to_i == 2
 		when /^G54D(\d{2,3})/	# Deprecated G54 function code
 		    current_layer.parse_gcode(54, nil, nil, nil, nil, $1)
 		when /^G70/

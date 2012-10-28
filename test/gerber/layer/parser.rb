@@ -478,20 +478,4 @@ describe Gerber::Layer::Parser do
 	    end
 	end
     end
-
-    describe "when parsing an M code" do
-	it "must ignore M00" do
-	    parser.parse_mcode(0)
-	end
-
-	it "must ignore M01" do
-	    parser.parse_mcode(1)
-	end
-
-	it "must reject anything after M02" do
-	    skip "Not yet implemented"
-	    parser.parse_mcode(2)
-	    lambda { parser.parse_dcode('D11') }.must_raise Gerber::ParseError
-	end
-    end
 end

@@ -9,12 +9,11 @@ class Gerber
 	    attr_reader :position
 	    attr_reader :quadrant_mode
 
-	    attr_accessor :draw, :eof
+	    attr_accessor :eof
 
 	    def initialize(*args)
 		super
 
-		self.draw = false
 		self.eof = false
 		@coordinate_mode = :absolute
 		@quadrant_mode = :single
@@ -77,16 +76,12 @@ class Gerber
 		/D(\d{2,3})/ =~ s
 		dcode = $1.to_i
 		case dcode
-		    when 1
-		    self.draw = true
-		    when 2
-		    self.draw = false
-		    when 3
-		    self.draw = :flash
+		    when 1, 2, 3
+			@dcode = dcode
 		    when 10...999
-		    self.current_aperture = dcode
+			self.current_aperture = dcode
 		    else
-		    raise ParseError, "Invalid D Code #{dcode}"
+			raise ParseError, "Invalid D Code #{dcode}"
 		end
 	    end
 
@@ -131,23 +126,18 @@ class Gerber
 		end
 	    end
 
-	    def parse_g1(x, y, d)
+	    def parse_g1(x, y, dcode)
 		point = Point[apply_units(x) || @position.x, apply_units(y) || @position.y]
-		draw_code = self.draw ? ((:flash == self.draw) ? 3 : 1) : 2;
-		dcode = d ? d.to_i : draw_code
 		case dcode
 		    when 1
 			line = Geometry::Line[@position, point]
 			self << line
 			@position = point
-			self.draw = true
 		    when 2
 			@position = point
-			self.draw = false
 		    when 3
 			self << point
 			@position = point
-			self.draw = :flash
 		    else
 			raise ParseError, "Invalid D parameter (#{dcode}) in G1"
 		end

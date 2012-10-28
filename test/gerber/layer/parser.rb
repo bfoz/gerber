@@ -7,6 +7,10 @@ class Gerber
 	    def geometry
 		self.layer.geometry
 	    end
+
+	    def dcode
+		@dcode
+	    end
 	end
     end
 end
@@ -43,23 +47,23 @@ describe Gerber::Layer::Parser do
     describe "when parsing a D code" do
 	it "must start drawing for D01" do
 	    parser.parse_dcode('D01')
-	    parser.draw.must_equal true
+	    parser.dcode.must_equal 1
 	end
 
 	it "must stop drawing for D02" do
 	    parser.parse_dcode('D02')
-	    parser.draw.must_equal false
+	    parser.dcode.must_equal 2
 	end
 
 	it "must flash for D03" do
 	    parser.parse_dcode('D03')
-	    parser.draw.must_equal :flash
+	    parser.dcode.must_equal 3
 	end
 
 	it "must set the current aperture number" do
-	    original_state = parser.draw
+	    original_state = parser.dcode
 	    parser.parse_dcode('D11')
-	    parser.draw.must_equal original_state
+	    parser.dcode.must_equal original_state
 	    parser.current_aperture.must_equal 11
 	    parser.geometry[11].must_be_instance_of(Array)
 	end

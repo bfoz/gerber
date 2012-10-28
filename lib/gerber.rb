@@ -2,6 +2,7 @@ require 'geometry'
 require 'units'
 require_relative 'gerber/aperture'
 require_relative 'gerber/layer'
+require_relative 'gerber/layer/parser'
 
 =begin
 Read and write {http://en.wikipedia.org/wiki/Gerber_Format Gerber} files (RS-274X)
@@ -21,6 +22,7 @@ class Gerber
     def initialize
 	@apertures = []
 	@layers = []
+	@layer_parsers = []
 	@axis_mirror = {:a => 1, :b => 1}   # 1 => not mirrored, -1 => mirrored
 	@axis_select = {:a => :x, :b => :y}
 	@offset = Point[0,0]
@@ -51,14 +53,15 @@ class Gerber
 
     # The {Layer} currently being parsed
     def current_layer
-	@layers.last || (@layers << Layer.new).last
+	@layer_parsers.last || new_layer
     end
     private :current_layer
 
+    # Create and return a new {Layer::Parser}
     def new_layer
-	(@layers << Layer.new).last.polarity = @new_layer_polarity
-	('inch' == @units) ? @layers.last.set_inches : @layers.last.set_millimeters
-	@layers.last
+	(@layer_parsers << Layer::Parser.new).last.polarity = @new_layer_polarity
+	('inch' == @units) ? @layer_parsers.last.set_inches : @layer_parsers.last.set_millimeters
+	@layer_parsers.last
     end
 
     # Assume that all dimensions are in inches

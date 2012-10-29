@@ -5,8 +5,8 @@ require 'units'
 A Gerber information layer (not to be confused with a PCB layer)
 =end
 class Gerber
-    class Layer < Struct.new(:draw, :eof, :geometry)
-	attr_accessor :name, :polarity, :step, :repeat
+    class Layer
+	attr_accessor :geometry, :name, :polarity, :step, :repeat
 
 	def initialize(*args)
 	    super
@@ -16,11 +16,6 @@ class Gerber
 	    @repeat = Vector[1,1]
 	    @step = Vector[0,0]
 	    @units = nil
-	end
-
-	def <<(arg)
-	    raise ParseError, "Must set an aperture before generating geometry" unless self.current_aperture
-	    self.geometry[self.current_aperture] << arg if arg.kind_of?(Line) || arg.kind_of?(Point) || arg.kind_of?(Arc)
 	end
 
 	# @group Accessors
@@ -36,11 +31,5 @@ class Gerber
 	    @units = 'millimeters'
 	end
 	# @endgroup
-
-	def apply_units(a)
-	    raise ParseError, "Units must be set before specifying coordinates" unless @units
-	    return nil unless a
-	    (@units == 'inch') ? a.inch : a.mm
-	end
     end
 end

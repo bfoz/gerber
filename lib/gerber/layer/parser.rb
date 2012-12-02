@@ -3,6 +3,8 @@ require 'gerber/layer'
 class Gerber
     class Layer
 	class Parser
+	    DCodeError = Class.new(ParseError)
+
 	    attr_reader :current_aperture
 	    attr_reader :coordinate_mode
 	    attr_reader :layer
@@ -104,7 +106,7 @@ class Gerber
 		    when 37
 			p "disable outline fill"
 		    when 54
-			raise ParseError, "G54 requires a D code (found #{x}, #{y}, #{dcode})" unless dcode
+			raise DCodeError, "G54 requires a D code (found #{x}, #{y}, #{dcode})" unless dcode
 			self.current_aperture = dcode.to_i
 		    when 70
 			set_inches
@@ -136,12 +138,12 @@ class Gerber
 			self << point
 			@position = point
 		    else
-			raise ParseError, "Invalid D parameter (#{dcode}) in G1"
+			raise DCodeError, "Invalid D parameter (#{dcode}) in G1"
 		end
 	    end
 
 	    def parse_g2(x, y, i, j, dcode)
-		raise ParseError, "In G2 dcode must be either 1 or 2" unless [1, 2].include? dcode
+		raise DCodeError, "In G2 dcode must be either 1 or 2" unless [1, 2].include? dcode
 		if 1 == dcode
 		    x, y, i, j = [x, y, i, j].map {|a| apply_units(a)}
 		    startPoint = if self.quadrant_mode == :single
@@ -169,7 +171,7 @@ class Gerber
 	    end
 
 	    def parse_g3(x, y, i, j, dcode)
-		raise ParseError, "In G3 dcode must be either 1 or 2" unless [1, 2].include? dcode
+		raise DCodeError, "In G3 dcode must be either 1 or 2" unless [1, 2].include? dcode
 		if 1 == dcode
 		    x, y, i, j = [x, y, i, j].map {|a| apply_units(a)}
 		    endPoint = if self.quadrant_mode == :single

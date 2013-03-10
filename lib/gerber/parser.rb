@@ -158,7 +158,7 @@ Read and parse {http://en.wikipedia.org/wiki/Gerber_Format Gerber} files (RS-274
 		    case type
 			when 'C'
 			    m = s.match(/C,(?<diameter>[\d.]+)(X(?<x>[\d.]+)(X(?<y>[\d.]+))?)?/)
-			    aperture = Aperture.new(:type => :circle, :diameter => parse_float(m[:diameter]))
+			    aperture = Aperture.new(:circle => parse_float(m[:diameter]))
 			    if( m[:x] )
 				x = parse_float(m[:x])
 				aperture.hole = m[:y] ? {:x => x, :y => parse_float(m[:y])} : x
@@ -166,7 +166,7 @@ Read and parse {http://en.wikipedia.org/wiki/Gerber_Format Gerber} files (RS-274
 
 			when 'R'
 			    m = s.match(/R,(?<x>[\d.]+)X(?<y>[\d.]+)(X(?<hole_x>[\d.]+)(X(?<hole_y>[\d.]+))?)?/)
-			    aperture = Aperture.new(:type => :rectangle, :x => parse_float(m[:x]), :y => parse_float(m[:y]))
+			    aperture = Aperture.new(:rectangle => [parse_float(m[:x]), parse_float(m[:y])])
 			    if( m[:hole_x] )
 				hole_x = parse_float(m[:hole_x])
 				aperture.hole = m[:hole_y] ? {:x => hole_x, :y => parse_float(m[:hole_y])} : hole_x
@@ -174,7 +174,7 @@ Read and parse {http://en.wikipedia.org/wiki/Gerber_Format Gerber} files (RS-274
 
 			when 'O'
 			    m = s.match(/O,(?<x>[\d.]+)X(?<y>[\d.]+)(X(?<hole_x>[\d.]+)(X(?<hole_y>[\d.]+))?)?/)
-			    aperture = Aperture.new(:type => :obround, :x => parse_float(m[:x]), :y => parse_float(m[:y]))
+			    aperture = Aperture.new(:obround => [parse_float(m[:x]), parse_float(m[:y])])
 			    if( m[:hole_x] )
 				hole_x = parse_float(m[:hole_x])
 				aperture.hole = m[:hole_y] ? {:x => hole_x, :y => parse_float(m[:hole_y])} : hole_x
@@ -182,7 +182,7 @@ Read and parse {http://en.wikipedia.org/wiki/Gerber_Format Gerber} files (RS-274
 
 			when 'P'
 			    m = s.match(/P,(?<diameter>[\d.]+)X(?<sides>[\d.]+)(X(?<rotation>[\d.]+)(X(?<hole_x>[\d.]+)(X(?<hole_y>[\d.]+))?)?)?/)
-			    aperture = Aperture.new(:type => :polygon, :diameter => parse_float(m[:diameter]), :sides => m[:sides].to_i)
+			    aperture = Aperture.new(:polygon => parse_float(m[:diameter]), :sides => m[:sides].to_i)
 			    if( m[:rotation] )
 				aperture.rotation = m[:rotation].to_i.degrees
 				if( m[:hole_x] )
@@ -194,7 +194,7 @@ Read and parse {http://en.wikipedia.org/wiki/Gerber_Format Gerber} files (RS-274
 			else    # Special Aperture
 			    captures = s.match(/#{type}(,([\d.]+)(X([\d.]+))*)?/).captures
 			    parameters = captures.values_at(* captures.each_index.select {|i| i.odd?}).select {|p| p }
-			    aperture = Aperture.new(:type=>type)
+			    aperture = Aperture.new(:name=>type)
 			    aperture.parameters = parameters.map {|p| parse_float(p) } if( parameters && (0 != parameters.size ) )
 		    end
 		    self.apertures[dcode] = aperture

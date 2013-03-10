@@ -53,51 +53,53 @@ describe Gerber::Parser do
 		describe "for a standard circle" do
 		    it "without a hole" do
 			parser.parse_parameter('ADD10C,0.0070*')
-			parser.apertures[10].must_equal(Gerber::Aperture.new(:type=>:circle, :diameter=>0.007.inch))
+			parser.apertures[10].must_equal(Gerber::Aperture.new(:circle=>0.007.inch))
 		    end
 
 		    it "with a round hole" do
 			parser.parse_parameter('ADD10C,0.0070X0.025*')
-			parser.apertures[10].must_equal(Gerber::Aperture.new(:type=>:circle, :diameter=>0.007.inch, :hole=>0.025.inch))
+			parser.apertures[10].must_equal(Gerber::Aperture.new(:circle=>0.007.inch, :hole=>0.025.inch))
 		    end
 
 		    it "with a square hole" do
 			parser.parse_parameter('ADD10C,0.0070X0.025X0.050*')
-			parser.apertures[10].must_equal(Gerber::Aperture.new(:type=>:circle, :diameter=>0.007.inch, :hole=>{:x=>0.025.inch,:y=>0.050.inch}))
+			parser.apertures[10].must_equal(Gerber::Aperture.new(:circle=>0.007.inch, :hole=>{:x=>0.025.inch,:y=>0.050.inch}))
 		    end
 		end
 
 		describe "for a standard rectangle" do
 		    it "without a hole" do
 			parser.parse_parameter('ADD10R,0.020X0.040*')
-			parser.apertures[10].must_equal(Gerber::Aperture.new(:type=>:rectangle, :x=>0.020.inch, :y=>0.040.inch))
+			parser.apertures[10].must_equal(Gerber::Aperture.new(:rectangle=>[0.020.inch, 0.040.inch]))
 		    end
 
 		    it "with a round hole" do
 			parser.parse_parameter('ADD10R,0.020X0.040X0.025*')
-			parser.apertures[10].must_equal(Gerber::Aperture.new(:type=>:rectangle, :x=>0.020.inch, :y=>0.040.inch, :hole=>0.025.inch))
+			parser.apertures[10].must_equal(Gerber::Aperture.new(:rectangle=>[0.020.inch, 0.040.inch], :hole=>0.025.inch))
 		    end
 
 		    it "with a square hole" do
 			parser.parse_parameter('ADD10R,0.020X0.040X0.025X0.050*')
-			parser.apertures[10].must_equal(Gerber::Aperture.new(:type=>:rectangle, :x=>0.020.inch, :y=>0.040.inch, :hole=>{:x=>0.025.inch,:y=>0.050.inch}))
+			parser.apertures[10].must_equal(Gerber::Aperture.new(:rectangle=>[0.020.inch, 0.040.inch], :hole=>{:x=>0.025.inch,:y=>0.050.inch}))
 		    end
 		end
 
 		describe "for a standard obround" do
+		    let(:obround) { [0.020.inch, 0.040.inch] }
+
 		    it "without a hole" do
 			parser.parse_parameter('ADD10O,0.020X0.040*')
-			parser.apertures[10].must_equal(Gerber::Aperture.new(:type=>:obround, :x=>0.020.inch, :y=>0.040.inch))
+			parser.apertures[10].must_equal(Gerber::Aperture.new(:obround=>obround))
 		    end
 
 		    it "with a round hole" do
 			parser.parse_parameter('ADD10O,0.020X0.040X0.025*')
-			parser.apertures[10].must_equal(Gerber::Aperture.new(:type=>:obround, :x=>0.020.inch, :y=>0.040.inch, :hole=>0.025.inch))
+			parser.apertures[10].must_equal(Gerber::Aperture.new(:obround=>[0.020.inch, 0.040.inch], :hole=>0.025.inch))
 		    end
 
 		    it "with a square hole" do
 			parser.parse_parameter('ADD10O,0.020X0.040X0.025X0.050*')
-			parser.apertures[10].must_equal(Gerber::Aperture.new(:type=>:obround, :x=>0.020.inch, :y=>0.040.inch, :hole=>{:x=>0.025.inch,:y=>0.050.inch}))
+			parser.apertures[10].must_equal(Gerber::Aperture.new(:obround=>[0.020.inch, 0.040.inch], :hole=>{:x=>0.025.inch,:y=>0.050.inch}))
 		    end
 		end
 
@@ -105,34 +107,35 @@ describe Gerber::Parser do
 		    describe "with rotation" do
 			it "without a hole" do
 			    parser.parse_parameter('ADD10P,0.030X4X90*')
-			    parser.apertures[10].must_equal(Gerber::Aperture.new(:type=>:polygon, :diameter=>0.030.inch, :sides=>4, :rotation=>90.0.degrees))
+			    parser.apertures[10].shape.must_be_kind_of(Geometry::RegularPolygon)
+			    parser.apertures[10].must_equal(Gerber::Aperture.new(:polygon=>0.030.inch, :sides=>4, :rotation=>90.0.degrees))
 			end
 
 			it "with a round hole" do
 			    parser.parse_parameter('ADD10P,0.030X4X90X0.040*')
-			    parser.apertures[10].must_equal(Gerber::Aperture.new(:type=>:polygon, :diameter=>0.030.inch, :sides=>4, :rotation=>90.0.degrees, :hole=>0.040.inch))
+			    parser.apertures[10].must_equal(Gerber::Aperture.new(:polygon=>0.030.inch, :sides=>4, :rotation=>90.0.degrees, :hole=>0.040.inch))
 			end
 
 			it "with a square hole" do
 			    parser.parse_parameter('ADD10P,0.030X4X90X0.040X0.025*')
-			    parser.apertures[10].must_equal(Gerber::Aperture.new(:type=>:polygon, :diameter=>0.030.inch, :sides=>4, :rotation=>90.0.degrees, :hole=>{:x=>0.040.inch,:y=>0.025.inch}))
+			    parser.apertures[10].must_equal(Gerber::Aperture.new(:polygon=>0.030.inch, :sides=>4, :rotation=>90.0.degrees, :hole=>{:x=>0.040.inch,:y=>0.025.inch}))
 			end
 		    end
 
 		    describe "without rotation" do
 			it "without a hole" do
 			    parser.parse_parameter('ADD10P,0.030X4*')
-			    parser.apertures[10].must_equal(Gerber::Aperture.new(:type=>:polygon, :diameter=>0.030.inch, :sides=>4))
+			    parser.apertures[10].must_equal(Gerber::Aperture.new(:polygon=>0.030.inch, :sides=>4))
 			end
 
 			it "with a round hole" do
 			    parser.parse_parameter('ADD10P,0.030X4X0X0.040*')
-			    parser.apertures[10].must_equal(Gerber::Aperture.new(:type=>:polygon, :diameter=>0.030.inch, :sides=>4, :rotation=>0.0, :hole=>0.040.inch))
+			    parser.apertures[10].must_equal(Gerber::Aperture.new(:polygon=>0.030.inch, :sides=>4, :rotation=>0.0, :hole=>0.040.inch))
 			end
 
 			it "with a square hole" do
 			    parser.parse_parameter('ADD10P,0.030X4X0X0.040X0.025*')
-			    parser.apertures[10].must_equal(Gerber::Aperture.new(:type=>:polygon, :diameter=>0.030.inch, :sides=>4, :rotation=>0.0, :hole=>{:x=>0.040.inch,:y=>0.025.inch}))
+			    parser.apertures[10].must_equal(Gerber::Aperture.new(:polygon=>0.030.inch, :sides=>4, :rotation=>0.0, :hole=>{:x=>0.040.inch,:y=>0.025.inch}))
 			end
 		    end
 		end

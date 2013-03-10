@@ -15,5 +15,5 @@ Gem::Specification.new do |gem|
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ["lib"]
 
-  gem.add_dependency  'geometry'
+  gem.add_dependency  'geometry', '>= 6'
 end

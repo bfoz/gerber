@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |gem|
   gem.name          = "gerber"
-  gem.version       = 0
+  gem.version       = 1
 
   gem.authors       = ["Brandon Fosdick"]
   gem.email         = ["bfoz@bfoz.net"]

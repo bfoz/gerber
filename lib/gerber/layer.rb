@@ -6,11 +6,12 @@ A Gerber information layer (not to be confused with a PCB layer)
 =end
 class Gerber
     class Layer
-	attr_accessor :geometry, :name, :polarity, :step, :repeat
+	attr_accessor :apertures, :geometry, :name, :polarity, :step, :repeat
 
 	def initialize(*args)
 	    super
 
+	    self.apertures = {}
 	    self.geometry = []
 	    @polarity = :dark
 	    @repeat = Vector[1,1]
@@ -19,6 +20,16 @@ class Gerber
 	end
 
 	# @group Accessors
+	# @return [Bool]    True if polarity is set to :clear
+	def clear?
+	    :clear == @polarity
+	end
+
+	# @return [Bool]    True if polarity is set to :dark
+	def dark?
+	    :dark == @polarity
+	end
+
 	def empty?
 	    self.geometry.empty?
 	end
@@ -29,6 +40,16 @@ class Gerber
 
 	def set_millimeters
 	    @units = 'millimeters'
+	end
+	# @endgroup
+
+	# @group Geometry
+	def add_line(aperture, start_point, end_point)
+	    if @apertures.has_key? aperture
+		@apertures[aperture] << Geometry::Line[start_point, end_point]
+	    else
+		@apertures[aperture] = [Geometry::Line[start_point, end_point]]
+	    end
 	end
 	# @endgroup
     end

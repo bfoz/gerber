@@ -77,10 +77,10 @@ class Gerber
 		case dcode
 		    when 1, 2, 3
 			@dcode = dcode
-		    when 10...999
-			self.current_aperture = dcode
-		    else
+		    when 4..9
 			raise ParseError, "Invalid D Code #{dcode}"
+		    else
+			self.current_aperture = dcode
 		end
 	    end
 

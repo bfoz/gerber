@@ -158,7 +158,7 @@ Read and parse {http://en.wikipedia.org/wiki/Gerber_Format Gerber} files (RS-274
 		when 'AD'	# Section 4.1
 		    dcode, type = s.match(/ADD(\d{2,3})(\w+)/).captures
 		    dcode = dcode.to_i
-		    raise ParseError unless (dcode >= 10) and (dcode <= 999)
+		    raise ParseError, "Invalid aperture number #{dcode}" unless dcode >= 10
 		    case type
 			when 'C'
 			    m = s.match(/C,(?<diameter>[\d.]+)(X(?<x>[\d.]+)(X(?<y>[\d.]+))?)?/)

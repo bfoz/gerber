@@ -13,6 +13,8 @@ class Gerber
     Line = Geometry::Line
     Point = Geometry::Point
 
+    attr_accessor :name
+
     attr_accessor :integer_places, :decimal_places
     attr_accessor :zero_omission
 
@@ -103,6 +105,8 @@ class Gerber
 	raise StandardError, "The default units must be set" unless @units
 	raise StandardError, "The Zero Omission Mode must be set" unless @zero_omission
 	raise StandardError, "The coordinate format must be set" unless @decimal_places && @integer_places
+
+	output.puts "%IN#{@name}*%" if @name
 
 	output << '%FS'
 	output << ((@zero_omission == :leading) ? 'L' : 'T')

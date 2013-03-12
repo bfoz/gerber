@@ -44,6 +44,21 @@ describe Gerber::Parser do
     describe "when parsing parameters" do
 	let(:parser) { Gerber::Parser.new }
 
+	describe "when parsing an Image Name parameter" do
+	    it "must raise an Exception when the name contains a space" do
+		lambda { parser.parse_parameter('INImage Name') }.must_raise Gerber::ParseError
+	    end
+
+	    it "must raise an exception when the name contains an invalid character" do
+		lambda { parser.parse_parameter('INImage%Name') }.must_raise Gerber::ParseError
+	    end
+
+	    it "must accept a valid name" do
+		parser.parse_parameter('INImage_Name*')
+		parser.image_name.must_equal 'Image_Name'
+	    end
+	end
+
 	describe "when parsing a Mode parameter" do
 	    before do
 		parser.parse_parameter('MOIN')

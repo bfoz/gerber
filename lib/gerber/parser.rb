@@ -17,6 +17,8 @@ Read and parse {http://en.wikipedia.org/wiki/Gerber_Format Gerber} files (RS-274
 	attr_reader :eof
 	attr_reader :total_places
 
+	attr_reader :image_name
+
 	def initialize
 	    @apertures = []
 	    @eof = false
@@ -25,6 +27,7 @@ Read and parse {http://en.wikipedia.org/wiki/Gerber_Format Gerber} files (RS-274
 	    @axis_mirror = {:a => 1, :b => 1}   # 1 => not mirrored, -1 => mirrored
 	    @axis_select = {:a => :x, :b => :y}
 	    @offset = Point[0,0]
+
 	    @polarity = :positive
 	    @rotation = 0.degrees
 	    @scale = Vector[0,0]
@@ -115,6 +118,7 @@ Read and parse {http://en.wikipedia.org/wiki/Gerber_Format Gerber} files (RS-274
 	    gerber = Gerber.new
 	    gerber.apertures.replace @apertures
 	    gerber.coordinate_format = self.integer_places, self.decimal_places
+	    gerber.name = @image_name
 	    gerber.layers.replace @layers
 	    gerber.zero_omission = self.zero_omission
 	    gerber
@@ -239,6 +243,11 @@ Read and parse {http://en.wikipedia.org/wiki/Gerber_Format Gerber} files (RS-274
 		when 'SF'	# Deprecated
 		    /^SF(A([\d.+-]+))?(B([\d.+-]+))?/ =~ s
 		    @scale = Vector[parse_float($2) || 0.0, parse_float($4) || 0.0]
+
+		# Section 5.4, revI1 - Image Name
+		when 'IN'
+		    raise ParseError, 'Invalid Image Name' unless /^IN([\w[^ %*;]]+)\*$/ =~ s
+		    @image_name = $1
 
 		# Section 4.4 - Image Parameters
 		when 'IJ'	# Deprecated

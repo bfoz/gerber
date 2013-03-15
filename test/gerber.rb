@@ -1,4 +1,5 @@
 require 'minitest/autorun'
+require 'gerber/exceptions'
 require 'gerber'
 require 'stringio'
 

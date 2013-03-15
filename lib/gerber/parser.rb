@@ -1,5 +1,5 @@
 require 'geometry'
-require 'gerber'
+require 'gerber/exceptions'
 require 'units'
 require_relative 'aperture'
 require_relative 'layer'

@@ -1,10 +1,9 @@
+require 'gerber/exceptions'
 require 'gerber/layer'
 
 class Gerber
     class Layer
 	class Parser
-	    DCodeError = Class.new(ParseError)
-
 	    attr_reader :current_aperture
 	    attr_reader :coordinate_mode
 	    attr_reader :layer

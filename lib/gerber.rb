@@ -7,8 +7,6 @@ require_relative 'gerber/layer/unparser'
 Read and write {http://en.wikipedia.org/wiki/Gerber_Format Gerber} files (RS-274X)
 =end
 class Gerber
-    ParseError = Class.new(StandardError)
-
     Arc = Geometry::Arc
     Line = Geometry::Line
     Point = Geometry::Point

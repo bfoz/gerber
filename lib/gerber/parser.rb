@@ -245,8 +245,8 @@ Read and parse {http://en.wikipedia.org/wiki/Gerber_Format Gerber} files (RS-274
 		    @scale = Vector[parse_float($2) || 0.0, parse_float($4) || 0.0]
 
 		# Section 5.4, revI1 - Image Name
-		when 'IN'
-		    raise ParseError, 'Invalid Image Name' unless /^IN([\w[^ %*;]]+)\*$/ =~ s
+		when 'IN'   # RS-274-D allows spaces, but RS-274X does not
+		    raise ParseError, "Invalid Image Name: #{s}" unless /^IN([\w[^%*;]]+)\*$/ =~ s
 		    @image_name = $1
 
 		# Section 4.4 - Image Parameters

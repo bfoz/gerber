@@ -175,8 +175,6 @@ describe Gerber::Parser do
 	end
 
 	describe "when parsing a format specification" do
-	    let(:parser) { Gerber::Parser.new }
-
 	    it "leading absolute" do
 		parser.parse_parameter('FSLAX25Y25')
 		parser.zero_omission.must_equal :leading
@@ -211,6 +209,23 @@ describe Gerber::Parser do
 		parser.integer_places.must_equal 2
 		parser.decimal_places.must_equal 5
 		parser.total_places.must_equal 7
+	    end
+	end
+
+	describe "when parsing RS-274-D formatted parameters" do
+	    before do
+		parser.parse_parameter 'MOIN*'
+	    end
+
+	    it "must switch modes" do
+		parser.rs_274_d.must_be_nil
+		parser.parse_parameter 'ADD10C, 0.0100*'
+		parser.rs_274_d.wont_be_nil
+	    end
+
+	    it "must support spaces between parameters" do
+		parser.parse_parameter 'ADD50R, 0.0453 X0.0354*'
+		parser.rs_274_d.wont_be_nil
 	    end
 	end
 

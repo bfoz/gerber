@@ -18,6 +18,7 @@ Read and parse {http://en.wikipedia.org/wiki/Gerber_Format Gerber} files (RS-274
 	attr_reader :total_places
 
 	attr_reader :image_name
+	attr_reader :rs_274_d
 
 	def initialize
 	    @apertures = []
@@ -148,7 +149,7 @@ Read and parse {http://en.wikipedia.org/wiki/Gerber_Format Gerber} files (RS-274
 	# @param [String] s	    The string to convert
 	# @return [Float]	    The resulting {Float} with units, or nil
 	def parse_float(s)
-	    apply_units(s.to_f)
+	    s ? apply_units(s.to_f) : nil
 	end
 
 	# Parse a set of parameter blocks
@@ -156,50 +157,36 @@ Read and parse {http://en.wikipedia.org/wiki/Gerber_Format Gerber} files (RS-274
 	    directive = s[0,2]
 	    case directive
 		when 'AD'	# Section 4.1
-		    dcode, type = s.match(/ADD(\d{2,3})(\w+)/).captures
+		    dcode, type, space, body = s.match(/ADD(\d{2,3})(\w+)(, ?)?(.*)$/).captures
 		    dcode = dcode.to_i
 		    raise ParseError, "Invalid aperture number #{dcode}" unless dcode >= 10
+		    @rs_274_d = space unless @rs_274_d
+
+		    modifiers = body.scan(/ ?X?([\d.]+)/).flatten
+
 		    case type
 			when 'C'
-			    m = s.match(/C,(?<diameter>[\d.]+)(X(?<x>[\d.]+)(X(?<y>[\d.]+))?)?/)
-			    aperture = Aperture.new(:circle => parse_float(m[:diameter]))
-			    if( m[:x] )
-				x = parse_float(m[:x])
-				aperture.hole = m[:y] ? {:x => x, :y => parse_float(m[:y])} : x
-			    end
+			    diameter, x, y = modifiers.map {|m| parse_float m }
+			    aperture = Aperture.new(circle: diameter, hole: (y ? {:x => x, :y => y} : x))
 
 			when 'R'
-			    m = s.match(/R,(?<x>[\d.]+)X(?<y>[\d.]+)(X(?<hole_x>[\d.]+)(X(?<hole_y>[\d.]+))?)?/)
-			    aperture = Aperture.new(:rectangle => [parse_float(m[:x]), parse_float(m[:y])])
-			    if( m[:hole_x] )
-				hole_x = parse_float(m[:hole_x])
-				aperture.hole = m[:hole_y] ? {:x => hole_x, :y => parse_float(m[:hole_y])} : hole_x
-			    end
+			    x, y, hole_x, hole_y = modifiers.map {|m| parse_float m }
+			    aperture = Aperture.new(rectangle: [x, y], hole: (hole_y ? {:x => hole_x, :y => hole_y} : hole_x))
 
 			when 'O'
-			    m = s.match(/O,(?<x>[\d.]+)X(?<y>[\d.]+)(X(?<hole_x>[\d.]+)(X(?<hole_y>[\d.]+))?)?/)
-			    aperture = Aperture.new(:obround => [parse_float(m[:x]), parse_float(m[:y])])
-			    if( m[:hole_x] )
-				hole_x = parse_float(m[:hole_x])
-				aperture.hole = m[:hole_y] ? {:x => hole_x, :y => parse_float(m[:hole_y])} : hole_x
-			    end
+			    x, y, hole_x, hole_y = modifiers.map {|m| parse_float m }
+			    aperture = Aperture.new(obround: [x, y], hole: (hole_y ? {:x => hole_x, :y => hole_y} : hole_x))
 
 			when 'P'
-			    m = s.match(/P,(?<diameter>[\d.]+)X(?<sides>[\d.]+)(X(?<rotation>[\d.]+)(X(?<hole_x>[\d.]+)(X(?<hole_y>[\d.]+))?)?)?/)
-			    aperture = Aperture.new(:polygon => parse_float(m[:diameter]), :sides => m[:sides].to_i)
-			    if( m[:rotation] )
-				aperture.rotation = m[:rotation].to_i.degrees
-				if( m[:hole_x] )
-				    hole_x = parse_float(m[:hole_x])
-				    aperture.hole = m[:hole_y] ? {:x => hole_x, :y => parse_float(m[:hole_y])} : hole_x
-				end
-			    end
+			    diameter, sides, rotation, hole_x, hole_y = *modifiers
+			    diameter, hole_x, hole_y = [diameter, hole_x, hole_y].map {|m| parse_float m }
+			    aperture = Aperture.new(polygon: diameter, sides: sides.to_i)
+			    aperture.rotation = rotation.to_i.degrees if rotation
+			    aperture.hole = (hole_y ? {:x => hole_x, :y => hole_y} : hole_x) if hole_x
 
 			else    # Special Aperture
-			    captures = s.match(/#{type}(,([\d.]+)(X([\d.]+))*)?/).captures
-			    parameters = captures.values_at(* captures.each_index.select {|i| i.odd?}).select {|p| p }
 			    aperture = Aperture.new(:name=>type)
-			    aperture.parameters = parameters.map {|p| parse_float(p) } if( parameters && (0 != parameters.size ) )
+			    aperture.parameters = modifiers.map {|m| parse_float(m) } if( modifiers && (0 != modifiers.size) )
 		    end
 		    self.apertures[dcode] = aperture
 

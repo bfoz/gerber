@@ -276,6 +276,9 @@ Read and parse {http://en.wikipedia.org/wiki/Gerber_Format Gerber} files (RS-274
 		    layer = new_layer
 		    layer.step = Vector[i || 0, j || 0]
 		    layer.repeat = Vector[x || 1, y || 1]
+
+		when 'IC'
+		    warn "Use of deprecated IC parameter: #{s.chop}"
 		else
 		    raise ParseError, "Unrecognized Parameter Type: '#{directive}'"
 	    end

@@ -213,5 +213,11 @@ describe Gerber::Parser do
 		parser.total_places.must_equal 7
 	    end
 	end
+
+	describe "when parsing deprecated parameter" do
+	    it "IC" do
+		lambda { parser.parse_parameter('ICAS*') }.must_output nil, "Use of deprecated IC parameter: ICAS\n"
+	    end
+	end
     end
 end

@@ -1,4 +1,5 @@
 require 'geometry'
+require 'gerber/parser'
 require 'units'
 require_relative 'gerber/layer/parser'
 require_relative 'gerber/layer/unparser'

@@ -156,19 +156,24 @@ describe Gerber::Parser do
 		end
 
 		describe "for a macro" do
+		    before do
+			parser.parse_parameter "AMCIRC*1,1,$1,0.0000,0.0000*1,0,$2,$3,$4*"
+			@circ_macro = parser.aperture_macros['CIRC']
+		    end
+
 		    it "without parameters" do
 			parser.parse_parameter('ADD10CIRC')
-			parser.apertures[10].must_equal(Gerber::Aperture.new(:type=>'CIRC'))
+			parser.apertures[10].must_equal(Gerber::Aperture.new(name: 'CIRC', macro: @circ_macro))
 		    end
 
 		    it "with 1 parameter" do
 			parser.parse_parameter('ADD10CIRC,0.010')
-			parser.apertures[10].must_equal(Gerber::Aperture.new(:type=>'CIRC', :parameters=>[0.010.inch]))
+			parser.apertures[10].must_equal(Gerber::Aperture.new(name: 'CIRC', macro: @circ_macro, parameters: [0.010.inch]))
 		    end
 
 		    it "with multiple parameters" do
 			parser.parse_parameter('ADD10CIRC,0.010X0.020')
-			parser.apertures[10].must_equal(Gerber::Aperture.new(:type=>'CIRC', :parameters=>[0.010.inch,0.020.inch]))
+			parser.apertures[10].must_equal(Gerber::Aperture.new(name: 'CIRC', macro: @circ_macro, parameters: [0.010.inch,0.020.inch]))
 		    end
 		end
 	    end
@@ -229,9 +234,32 @@ describe Gerber::Parser do
 	    end
 	end
 
-	describe "when parsing deprecated parameter" do
+	describe "when parsing deprecated parameters" do
 	    it "IC" do
 		lambda { parser.parse_parameter('ICAS*') }.must_output nil, "Use of deprecated IC parameter: ICAS\n"
+	    end
+	end
+
+	describe "when parsing an Aperture Macro parameter" do
+	    before do
+		parser.parse_parameter('MOIN')
+	    end
+
+	    it "must parse the macro name" do
+		parser.parse_parameter "AMMACRONAME0*1,1,$1,0.0000,0.0000*1,0,$2,$3,$4*"
+		macro = parser.aperture_macros['MACRONAME0']
+		macro.wont_be_nil
+		macro.name.must_equal 'MACRONAME0'
+	    end
+
+	    it "must parse Fixed Modifier Values" do
+		parser.parse_parameter 'AMDONUTFIX*1,1,0.100,0,0*1,0,0.080,0,0*'
+		macro = parser.aperture_macros['DONUTFIX']
+		macro.wont_be_nil
+		macro.primitives.count.must_equal 2
+		macro.primitives.all? {|primitive| primitive.must_be_kind_of Gerber::ApertureMacro::Circle }
+		macro.primitives[0].exposure.must_equal '1'
+		macro.primitives[0].diameter.must_equal '0.100'
 	    end
 	end
     end

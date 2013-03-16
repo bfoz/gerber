@@ -1,4 +1,5 @@
 require 'geometry'
+require 'gerber/aperture_macro'
 require 'gerber/exceptions'
 require 'units'
 require_relative 'aperture'
@@ -13,7 +14,7 @@ Read and parse {http://en.wikipedia.org/wiki/Gerber_Format Gerber} files (RS-274
 	attr_accessor :integer_places, :decimal_places
 	attr_accessor :zero_omission, :absolute
 
-	attr_reader :apertures, :layers
+	attr_reader :apertures, :aperture_macros, :layers
 	attr_reader :eof
 	attr_reader :total_places
 
@@ -22,6 +23,7 @@ Read and parse {http://en.wikipedia.org/wiki/Gerber_Format Gerber} files (RS-274
 
 	def initialize
 	    @apertures = []
+	    @aperture_macros = {}
 	    @eof = false
 	    @layers = []
 	    @layer_parsers = []
@@ -118,6 +120,7 @@ Read and parse {http://en.wikipedia.org/wiki/Gerber_Format Gerber} files (RS-274
 
 	    gerber = Gerber.new
 	    gerber.apertures.replace @apertures
+	    gerber.aperture_macros.replace @aperture_macros
 	    gerber.coordinate_format = self.integer_places, self.decimal_places
 	    gerber.name = @image_name
 	    gerber.layers.replace @layers
@@ -185,17 +188,31 @@ Read and parse {http://en.wikipedia.org/wiki/Gerber_Format Gerber} files (RS-274
 			    aperture.hole = (hole_y ? {:x => hole_x, :y => hole_y} : hole_x) if hole_x
 
 			else    # Special Aperture
-			    aperture = Aperture.new(:name=>type)
+			    macro = @aperture_macros[type]
+			    raise ParseError, "Aperture macro '#{type}' not defined" unless macro
+			    aperture = Aperture.new(name: type, macro: macro)
 			    aperture.parameters = modifiers.map {|m| parse_float(m) } if( modifiers && (0 != modifiers.size) )
 		    end
 		    self.apertures[dcode] = aperture
 
 		# Section 4.2
 		when 'AM'
-    #		macro_name = block.match(/AM(\w*)\*/)[0]
-		    primitives = s.split '*'
-		    macro_name = primitives.shift.sub(/AM/,'')
-		    p "Aperature Macro: #{macro_name} => #{primitives}"
+		    macro_content = s.split '*'
+		    macro_name = macro_content.shift.sub(/AM/,'')
+		    aperture_macro = (@aperture_macros[macro_name] ||= ApertureMacro.new(macro_name))
+
+		    p "Aperature Macro: #{macro_name}"
+		    macro_content.map {|a| a.strip }.each do |line|
+			if /^\$([\d\w]+)=/ =~ line
+			    p "definition #{$1} => #{line}"
+			elsif /^0 (.*)/ =~ line
+			    p "comment #{$1}"
+			else
+			    modifiers = line.split(/[,|]/)
+			    aperture_macro.push_primitive *modifiers
+			end
+		    end
+
 		when 'SM'	# Deprecated
 		    /^SM(A(0|1))?(B(0|1))?/ =~ s
 		    @symbol_mirror[:a] = ('1' == $1) ? -1 : 1

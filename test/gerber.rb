@@ -42,6 +42,20 @@ describe Gerber do
 	lambda { Gerber.read('test/gerber/m02_not_at_end.gerber') }.must_raise Gerber::ParseError
     end
 
+    describe "when reading" do
+	describe "an empty file" do
+	    let(:gerber) { Gerber.read 'test/fixtures/empty_millimeter.gerber' }
+
+	    it "must set the units" do
+		gerber.units.must_equal :millimeter
+	    end
+	end
+
+	it "a file with aperture macros with fixed modifiers" do
+	    Gerber.read('test/fixtures/macro_fixed.gerber').aperture_macros.size.must_equal 1
+	end
+    end
+
     describe "when unparsing" do
 	let(:gerber) { Gerber.new }
 	let(:testIO) { StringIO.new }

@@ -17,10 +17,11 @@ class Gerber
     attr_accessor :integer_places, :decimal_places
     attr_accessor :zero_omission
 
-    attr_reader :apertures, :layers
+    attr_reader :apertures, :aperture_macros, :layers
 
     def initialize
 	@apertures = []
+	@aperture_macros = {}
 	@layers = []
 	@polarity = :positive
 	@units = nil

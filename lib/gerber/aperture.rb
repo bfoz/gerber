@@ -5,7 +5,7 @@ An Aperture definition for an Extended {Gerber} file
 =end
 class Gerber
     class Aperture
-	attr_reader :name, :shape
+	attr_reader :macro, :name, :shape
 	attr_accessor :hole, :parameters, :rotation
 
 	def initialize(parameters)
@@ -28,7 +28,7 @@ class Gerber
 	end
 
 	def ==(other)
-	    (self.hole == other.hole) && (self.parameters == other.parameters) && (self.rotation == other.rotation) && (self.shape == other.shape)
+	    (self.hole == other.hole) && (self.parameters == other.parameters) && (self.rotation == other.rotation) && (self.shape == other.shape) &&(self.macro == other.macro)
 	end
 
 	# Converts the {Aperture} to a {String} suitable for appending to an AD parameter

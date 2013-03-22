@@ -261,6 +261,20 @@ describe Gerber::Parser do
 		macro.primitives[0].exposure.must_equal '1'
 		macro.primitives[0].diameter.must_equal '0.100'
 	    end
+
+	    it "must parse Variable Modifier Values" do
+		parser.parse_parameter 'AMDONUTVAR*1,1,$1,$2,$3*1,0,$4,$2,$3*'
+		macro = parser.aperture_macros['DONUTVAR']
+		macro.wont_be_nil
+		macro.primitives.count.must_equal 2
+		macro.primitives.all? {|primitive| primitive.must_be_kind_of Gerber::ApertureMacro::Circle }
+		macro.modifiers.count.must_equal 5
+		macro.modifiers[0].must_be_nil
+		macro.modifiers[1].must_be_kind_of Gerber::ApertureMacro::Variable
+		macro.modifiers[2].must_be_kind_of Gerber::ApertureMacro::Variable
+		macro.modifiers[3].must_be_kind_of Gerber::ApertureMacro::Variable
+		macro.modifiers[4].must_be_kind_of Gerber::ApertureMacro::Variable
+	    end
 	end
     end
 end

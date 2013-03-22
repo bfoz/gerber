@@ -202,16 +202,29 @@ Read and parse {http://en.wikipedia.org/wiki/Gerber_Format Gerber} files (RS-274
 		    aperture_macro = (@aperture_macros[macro_name] ||= ApertureMacro.new(macro_name))
 
 		    p "Aperature Macro: #{macro_name}"
+		    macro_modifiers = []
 		    macro_content.map {|a| a.strip }.each do |line|
 			if /^\$([\d\w]+)=/ =~ line
 			    p "definition #{$1} => #{line}"
 			elsif /^0 (.*)/ =~ line
 			    p "comment #{$1}"
 			else
-			    modifiers = line.split(/[,|]/)
+			    modifiers = line.split(/[,]/).map do |modifier|
+				if modifier.match(/^\$(\d+)$/)
+				    modifier_number = $1.to_i
+				    modifier = macro_modifiers.at(modifier_number)
+				    unless modifier
+					modifier = Gerber::ApertureMacro::Variable.new
+					macro_modifiers[modifier_number] = modifier
+				    end
+				end
+				modifier
+			    end
+
 			    aperture_macro.push_primitive *modifiers
 			end
 		    end
+		    aperture_macro.modifiers = macro_modifiers
 
 		when 'SM'	# Deprecated
 		    /^SM(A(0|1))?(B(0|1))?/ =~ s

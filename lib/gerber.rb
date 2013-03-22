@@ -118,6 +118,10 @@ class Gerber
 	# Image polarity should always be positive
 	output.puts (@polarity == :positive) ? '%IPPOS*%' : '%IPNEG*%'
 
+	@aperture_macros.each do |name, macro|
+	    output.puts "%AM#{name}*", macro.to_a.join("\n") + "%"
+	end
+
 	@apertures.each_with_index do |aperture, i|
 	    next if i < 10
 	    output.puts "%ADD#{i}#{aperture}*%"

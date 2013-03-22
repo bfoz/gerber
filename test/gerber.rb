@@ -146,5 +146,15 @@ describe Gerber do
 		testIO.string.must_equal File.read('test/fixtures/two_boxes.gerber')
 	    end
 	end
+
+	it "must unparse an image with macros with fixed modifiers" do
+	    Gerber.read('test/fixtures/macro_fixed.gerber').unparse testIO
+	    testIO.string.must_equal File.read('test/fixtures/macro_fixed.gerber')
+	end
+
+	it "must unparse an image with macros with variable modifiers" do
+	    Gerber.read('test/fixtures/macro_variable.gerber').unparse testIO
+	    testIO.string.must_equal File.read('test/fixtures/macro_variable.gerber')
+	end
     end
 end

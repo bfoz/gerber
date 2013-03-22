@@ -125,6 +125,13 @@ Read and parse {http://en.wikipedia.org/wiki/Gerber_Format Gerber} files (RS-274
 	    gerber.name = @image_name
 	    gerber.layers.replace @layers
 	    gerber.zero_omission = self.zero_omission
+
+	    if @units == 'inch'
+		gerber.set_inch
+	    else
+		gerber.set_millimeter
+	    end
+
 	    gerber
 	end
 

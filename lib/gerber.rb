@@ -12,7 +12,7 @@ class Gerber
     Line = Geometry::Line
     Point = Geometry::Point
 
-    attr_accessor :name
+    attr_accessor :name, :units
 
     attr_accessor :integer_places, :decimal_places
     attr_accessor :zero_omission

@@ -208,11 +208,10 @@ Read and parse {http://en.wikipedia.org/wiki/Gerber_Format Gerber} files (RS-274
 		    macro_name = macro_content.shift.sub(/AM/,'')
 		    aperture_macro = (@aperture_macros[macro_name] ||= ApertureMacro.new(macro_name))
 
-		    p "Aperature Macro: #{macro_name}"
 		    macro_modifiers = []
 		    macro_content.map {|a| a.strip }.each do |line|
-			if /^\$([\d\w]+)=/ =~ line
-			    p "definition #{$1} => #{line}"
+			if /^\$([\d\w]+)=(.*)/ =~ line
+			    aperture_macro.push_definition $1, $2
 			elsif /^0 (.*)/ =~ line
 			    aperture_macro.push_comment $1
 			else

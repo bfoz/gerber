@@ -16,6 +16,7 @@ class Gerber
 	Thermal = Struct.new :center_x, :center_y, :outer_diameter, :inner_diameter, :gap, :rotation
 
 	Comment = Struct.new :text
+	Definition = Struct.new :variable, :expression
 	Variable = Class.new
 
 	# @param [String] name	The name of the macro
@@ -29,6 +30,14 @@ class Gerber
 	def push_comment(text)
 	    text.strip!
 	    @primitives.push Comment.new(text) if text && text.length
+	end
+
+	# Push a new {Variable} {Definition}
+	# @param [String] text	The definition text
+	def push_definition(variable, expression)
+	    variable.strip!
+	    expression.strip!
+	    @primitives.push Definition.new(variable, expression) if [variable, expression].all? {|a| a && a.length }
 	end
 
 	# @param [Numeric,String] primitive_code    The primitive code of the Primitive to push
@@ -76,6 +85,8 @@ class Gerber
 		case primitive
 		    when Comment
 			s << '0 ' << primitive.text << '*'
+		    when Definition
+			s << '$' << primitive.variable << '=' << primitive.expression << '*'
 		    when Circle
 			s << '1,' << format_variables(*primitive.values).join(',') << '*'
 		    when Line

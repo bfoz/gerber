@@ -29,6 +29,13 @@ describe Gerber::ApertureMacro do
 		macro.primitives.last.must_be_kind_of Gerber::ApertureMacro::Circle
 	    end
 
+	    it "must push a Definition" do
+		macro.push_definition '$1', '$1+$2'
+		macro.primitives.last.must_be_kind_of Gerber::ApertureMacro::Definition
+		macro.primitives.last.variable.must_equal '$1'
+		macro.primitives.last.expression.must_equal '$1+$2'
+	    end
+
 	    it "must push a Line" do
 		macro.push_primitive 20,1,0.9,0,0.45,12,0.45,0
 		macro.primitives.last.must_be_kind_of Gerber::ApertureMacro::Line

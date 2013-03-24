@@ -18,6 +18,12 @@ describe Gerber::ApertureMacro do
 
     describe "when primitives with fixed modifiers" do
 	describe "when pushing a primitive" do
+	    it "must push a Comment" do
+		macro.push_comment "This is a comment"
+		macro.primitives.last.must_be_kind_of Gerber::ApertureMacro::Comment
+		macro.primitives.last.text.must_equal "This is a comment"
+	    end
+
 	    it "must push a Circle" do
 		macro.push_primitive 1,1,1.5,0,0
 		macro.primitives.last.must_be_kind_of Gerber::ApertureMacro::Circle
@@ -62,6 +68,11 @@ describe Gerber::ApertureMacro do
 	end
 
 	describe "when converting to an Array" do
+	    it "must convert a Comment" do
+		macro.push_comment "This is a comment"
+		macro.to_a.must_equal ['0 This is a comment*']
+	    end
+
 	    it "must convert a Circle" do
 		macro.push_primitive 1,1,1.5,0,0
 		macro.to_a.must_equal ['1,1,1.5,0,0*']

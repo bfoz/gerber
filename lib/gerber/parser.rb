@@ -214,7 +214,7 @@ Read and parse {http://en.wikipedia.org/wiki/Gerber_Format Gerber} files (RS-274
 			if /^\$([\d\w]+)=/ =~ line
 			    p "definition #{$1} => #{line}"
 			elsif /^0 (.*)/ =~ line
-			    p "comment #{$1}"
+			    aperture_macro.push_comment $1
 			else
 			    modifiers = line.split(/[,]/).map do |modifier|
 				if modifier.match(/^\$(\d+)$/)

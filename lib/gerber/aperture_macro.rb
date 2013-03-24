@@ -15,12 +15,20 @@ class Gerber
 	Moire = Struct.new :center_x, :center_y, :outer_diameter, :ring_thickness, :gap, :ring_count, :crosshair_thickness, :crosshair_length, :rotation
 	Thermal = Struct.new :center_x, :center_y, :outer_diameter, :inner_diameter, :gap, :rotation
 
+	Comment = Struct.new :text
 	Variable = Class.new
 
 	# @param [String] name	The name of the macro
 	def initialize(*args)
 	    @name = args.shift
 	    @primitives = []
+	end
+
+	# Push a new comment primitive to the macro
+	# @param [String] text	The comment text
+	def push_comment(text)
+	    text.strip!
+	    @primitives.push Comment.new(text) if text && text.length
 	end
 
 	# @param [Numeric,String] primitive_code    The primitive code of the Primitive to push
@@ -66,6 +74,8 @@ class Gerber
 	    @primitives.map do |primitive|
 		s = ''
 		case primitive
+		    when Comment
+			s << '0 ' << primitive.text << '*'
 		    when Circle
 			s << '1,' << format_variables(*primitive.values).join(',') << '*'
 		    when Line

@@ -12,7 +12,6 @@ class Gerber
 	    super
 
 	    self.apertures = {}
-	    self.geometry = []
 	    @polarity = :dark
 	    @repeat = Vector[1,1]
 	    @step = Vector[0,0]

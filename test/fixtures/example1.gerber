@@ -2,7 +2,7 @@ G04 Ucamco ex. 1: Two square boxes*
 %INBoxes*%
 %FSLAX26Y26*%
 %MOIN*%
-%LPD%
+%LPD*%
 %ADD10C,0.010*%
 D10*
 X0Y0D02*

@@ -87,7 +87,7 @@ Read and parse {http://en.wikipedia.org/wiki/Gerber_Format Gerber} files (RS-274
 	    input.each('*') do |block|
 		block.strip!
 		next if !block || block.empty?
-		raise ParseError, "Found blocks after M02" if self.eof
+		raise ParseError, "Found blocks after M02 '#{block}'" if self.eof
 		case block
 		    when /^%AM/ # Special handling for aperture macros
 			parse_parameter((block + input.gets('%')).gsub(/[\n%]/,''))
@@ -116,7 +116,21 @@ Read and parse {http://en.wikipedia.org/wiki/Gerber_Format Gerber} files (RS-274
 
 	    # FIXME apply any @rotation
 
-	    @layers = @layer_parsers.map {|parser| parser.layer }.select {|layer| !layer.empty? }
+	    @layers = @layer_parsers.select {|parser| !parser.empty? }.map do |parser|
+		layer = Gerber::Layer.new
+		layer.polarity = parser.polarity if parser.polarity
+		layer.name = parser.name
+		raise StandardError unless parser.geometry
+
+		parser.geometry.each_with_index do |geometry, aperture_number|
+		    next unless geometry
+		    aperture = self.apertures[aperture_number]
+		    raise ParseError, "Undefined aperture number #{aperture_number}" unless aperture
+		    layer.apertures[aperture] = geometry
+		end
+
+		layer
+	    end
 
 	    gerber = Gerber.new
 	    gerber.apertures.replace @apertures

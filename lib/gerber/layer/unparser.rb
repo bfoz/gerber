@@ -9,7 +9,8 @@ Unparse a Gerber image layer
 
 	    attr_accessor :integer_places, :decimal_places, :zero_omission
 
-	    def initialize(layer)
+	    def initialize(layer, apertures)
+		@apertures = apertures
 		@layer = layer
 		@zero_omission = :leading
 	    end
@@ -54,14 +55,13 @@ Unparse a Gerber image layer
 
 	    # Convert the {Layer} into an {Array} of {String}s suitable for writing to a file
 	    def to_a
-		a = (layer.dark? ? ['%LPD%'] : ['%LPC%'])
-		@layer.geometry.each_with_index do |elements, index|
-		    next if index < 10
-		    a << "D#{index}*"
+		a = (layer.dark? ? ['%LPD*%'] : ['%LPC*%'])
+		@layer.apertures.each do |aperture, elements|
+		    a << "D#{@apertures.index(aperture)}*"
 		    elements.each do |element|
 			case element
 			    when Geometry::Line
-				a << line_to_array(element)
+				 a << line_to_array(element)
 			end
 		    end
 		end

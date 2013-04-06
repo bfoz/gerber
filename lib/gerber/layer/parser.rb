@@ -4,19 +4,23 @@ require 'gerber/layer'
 class Gerber
     class Layer
 	class Parser
-	    attr_reader :current_aperture
+	    # @!attribute name
+	    #   @return [String]    The name of the current {Layer}
+	    # @!attribute polarity
+	    #	@return [Symbol]    The polarity setting of the current {Layer} (:dark or :clear)
+
+	    attr_accessor   :polarity
 	    attr_reader :coordinate_mode
-	    attr_reader :layer
-	    attr_reader :position
+	    attr_reader :geometry
+	    attr_reader :name, :position
 	    attr_reader :quadrant_mode
 
-	    def initialize(*args)
-		super
-
+	    def initialize
+		@aperture_number = nil
 		@coordinate_mode = :absolute
 		@dcode = 2	# off
 		@gcode = 1	# linear interpolation
-		@layer = Gerber::Layer.new
+		@geometry = []
 		@position = Point[0,0]
 		@quadrant_mode = :single
 		@repeat = Vector[1,1]
@@ -29,42 +33,29 @@ class Gerber
 	    end
 
 	    def <<(arg)
-		raise ParseError, "Must set an aperture before generating geometry" unless self.current_aperture
-		self.layer.geometry[current_aperture] << arg if is_valid_geometry(arg)
+		raise ParseError, "Must set an aperture before generating geometry" unless @aperture_number
+		if is_valid_geometry(arg)
+		    if @geometry[@aperture_number]
+			@geometry[@aperture_number] << arg
+		    else
+			@geometry[@aperture_number] = [arg]
+		    end
+		end
 	    end
 
 	    # @group Accessors
-	    def current_aperture=(arg)
-		@current_aperture = arg
-		self.layer.geometry[arg] = [] unless self.layer.geometry[arg].is_a?(Array)
+
+	    # @return [Bool]	True if no geometry was parsed
+	    def empty?
+		@geometry.empty?
 	    end
 
-	    # @return [String]	The name of the current {Layer}
-	    def name
-		self.layer.name
-	    end
-
-	    # Set the name of the current {Layer}
-	    # @param [String] name  An ASCII string to set the name to
-	    def name=(name)
-		self.layer.name = name
-	    end
-
-	    # @return [Symbol]	The polarity setting of the current {Layer} (:dark or :clear)
-	    def polarity
-		self.layer.polarity
-	    end
-
-	    # Set the polarity of the current {Layer}
-	    # @param [Symbol] polarity	Set the current polarity to either :clear or :dark
-	    def polarity=(polarity)
-		self.layer.polarity = polarity
-	    end
-
+	    # Set the current units to inches
 	    def set_inches
 		@units = 'inch'
 	    end
 
+	    # Set the current units to millimeters
 	    def set_millimeters
 		@units = 'millimeters'
 	    end
@@ -79,7 +70,7 @@ class Gerber
 		    when 4..9
 			raise ParseError, "Invalid D Code #{dcode}"
 		    else
-			self.current_aperture = dcode
+			@aperture_number = dcode
 		end
 	    end
 
@@ -106,7 +97,7 @@ class Gerber
 			p "disable outline fill"
 		    when 54
 			raise DCodeError, "G54 requires a D code (found #{x}, #{y}, #{dcode})" unless dcode
-			self.current_aperture = dcode.to_i
+			@aperture_number = dcode.to_i
 		    when 70
 			set_inches
 		    when 71

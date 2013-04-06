@@ -3,7 +3,7 @@ require 'gerber/layer/unparser'
 
 describe Gerber::Layer::Unparser do
     let(:layer) { Gerber::Layer.new }
-    let(:unparser) { Gerber::Layer::Unparser.new layer }
+    let(:unparser) { Gerber::Layer::Unparser.new layer, {} }
 
     describe "when formatting a G01 code" do
 	before do
@@ -70,7 +70,7 @@ describe Gerber::Layer::Unparser do
 		end
 	    end
 
-	    describe "when the Y coordinatte is the same as the current position" do
+	    describe "when the Y coordinate is the same as the current position" do
 		it "must format properly" do
 		    unparser.format_g1(3,2,3).must_equal 'X3000000D03*'
 		end

@@ -4,13 +4,8 @@ require 'gerber/layer/parser'
 class Gerber
     class Layer
 	class Parser
-	    def geometry
-		self.layer.geometry
-	    end
-
-	    def dcode
-		@dcode
-	    end
+	    attr_accessor :aperture_number
+	    attr_reader	:dcode
 	end
     end
 end
@@ -28,6 +23,11 @@ describe Gerber::Layer::Parser do
 
     it "must default to single quadrant mode" do
 	parser.quadrant_mode.must_equal :single
+    end
+
+    it "must start off empty" do
+	parser.empty?.must_equal true
+	parser.geometry.wont_be_nil
     end
 
     describe "when validating Geometry" do
@@ -64,8 +64,7 @@ describe Gerber::Layer::Parser do
 	    original_state = parser.dcode
 	    parser.parse_dcode('D11')
 	    parser.dcode.must_equal original_state
-	    parser.current_aperture.must_equal 11
-	    parser.geometry[11].must_be_instance_of(Array)
+	    parser.aperture_number.must_equal 11
 	end
     end
 
@@ -145,8 +144,7 @@ describe Gerber::Layer::Parser do
 
 	    it "must parse the deprecated G54 and set the current aperture" do
 		parser.parse_gcode(54, nil, nil, nil, nil, 10)
-		parser.current_aperture.must_equal 10
-		parser.geometry[10].must_be_instance_of(Array)
+		parser.aperture_number.must_equal 10
 	    end
 
 	    it "must reject a G54 without a D code" do
@@ -156,7 +154,7 @@ describe Gerber::Layer::Parser do
 
 	    describe "when an aperture has been set" do
 		before do
-		    parser.current_aperture = 10
+		    parser.aperture_number = 10
 		end
 
 		it "G1D1 must generate a Line" do
@@ -166,7 +164,7 @@ describe Gerber::Layer::Parser do
 
 		it "G1D2 must move the current position but not generate geometry" do
 		    parser.parse_gcode(1, 2, 3, 4, 5, 2)
-		    parser.geometry.last.length.must_equal 0
+		    parser.geometry.empty?.must_equal true
 		    parser.instance_variable_get(:@position).must_equal Geometry::Point[2.mm,3.mm]
 		end
 

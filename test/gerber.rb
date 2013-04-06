@@ -9,11 +9,11 @@ describe Gerber do
     end
 
     it "must read the 4PCB.com example" do
-	Gerber.read('test/gerber/sample_4pcb.gerber')
+	Gerber.read('test/fixtures/sample_4pcb.gerber')
     end
 
     it "must read the Wikipedia example" do
-	Gerber.read('test/gerber/wikipedia.gerber')
+	Gerber.read('test/fixtures/wikipedia.gerber')
     end
 
     describe "when reading Example 1 from the specification" do

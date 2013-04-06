@@ -136,16 +136,10 @@ class Gerber
 			self.push_aperture aperture
 			aperture_number = @apertures.count - 1
 		    end
-
-		    if layer.geometry[aperture_number]
-			layer.geometry[aperture_number] << elements
-		    else
-			layer.geometry[aperture_number] = elements
-		    end
 		end
 	    end
 
-	    unparser = Gerber::Layer::Unparser.new(layer)
+	    unparser = Gerber::Layer::Unparser.new(layer, @apertures)
 	    unparser.integer_places = self.integer_places
 	    unparser.decimal_places = self.decimal_places
 	    unparser.to_a.each {|a| output.puts a }

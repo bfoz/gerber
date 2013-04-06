@@ -11,7 +11,7 @@ G04 http://en.wikipedia.org/wiki/Gerber_format*
 %ADD19MACRO19*%
 %LPD*%
 G75*
-G54D10*
+G54D28*
 X176250Y117500D03*
 Y130000D03*
 Y163750D03*

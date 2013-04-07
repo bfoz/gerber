@@ -21,7 +21,6 @@ class Gerber
 		@dcode = 2	# off
 		@gcode = 1	# linear interpolation
 		@geometry = []
-		@position = Point[0,0]
 		@quadrant_mode = :single
 		@repeat = Vector[1,1]
 		@step = Vector[0,0]
@@ -52,11 +51,13 @@ class Gerber
 
 	    # Set the current units to inches
 	    def set_inches
+		@position = Point[0.inch, 0.inch] unless @position
 		@units = 'inch'
 	    end
 
 	    # Set the current units to millimeters
 	    def set_millimeters
+		@position = Point[0.mm, 0.mm] unless @position
 		@units = 'millimeters'
 	    end
 	    # @endgroup

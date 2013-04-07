@@ -16,6 +16,14 @@ describe Gerber do
 	Gerber.read('test/fixtures/wikipedia.gerber')
     end
 
+    it "must return correct bounds" do
+	Gerber.read('test/fixtures/example1.gerber').bounds.must_equal Rectangle.new -0.005.inch, -0.005.inch, 10.995.inch, 10.995.inch
+    end
+
+    it "must return the correct size" do
+	Gerber.read('test/fixtures/example1.gerber').size.must_equal Geometry::Size[11.inch,11.inch]
+    end
+
     describe "when reading Example 1 from the specification" do
 	let(:gerber) { Gerber.read('test/fixtures/example1.gerber') }
 

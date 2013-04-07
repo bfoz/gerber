@@ -8,6 +8,12 @@ class Gerber
 	attr_reader :macro, :name, :shape
 	attr_accessor :hole, :parameters, :rotation
 
+	Circle = Geometry::Circle
+	Obround = Geometry::Obround
+	Polygon = Geometry::RegularPolygon
+	Rectangle = Geometry::Rectangle
+	Size = Geometry::Size
+
 	def initialize(parameters)
 	    raise ArgumentError unless parameters.is_a? Hash
 
@@ -28,7 +34,24 @@ class Gerber
 	end
 
 	def ==(other)
-	    (self.hole == other.hole) && (self.parameters == other.parameters) && (self.rotation == other.rotation) && (self.shape == other.shape) &&(self.macro == other.macro)
+	    (self.hole == other.hole) && (self.parameters == other.parameters) && ((self.rotation || 0.degrees) == (other.rotation || 0.degrees)) && (self.shape == other.shape) && (self.macro == other.macro)
+	end
+
+	# @return [Rectangle]	A bounding box for the {Aperture}
+	def bounds
+	    Rectangle.new self.size
+	end
+
+	# @return [Size]    The size of the {Aperture}
+	def size
+	    case @shape
+		when Circle
+		    Size[@shape.diameter, @shape.diameter]
+		when Obround, Rectangle
+		    Size[@shape.width, @shape.height]
+		when Polygon
+		    Size[2*@shape.radius, 2*@shape.radius]
+	    end
 	end
 
 	# Converts the {Aperture} to a {String} suitable for appending to an AD parameter

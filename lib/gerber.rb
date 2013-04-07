@@ -70,6 +70,32 @@ class Gerber
     def set_millimeter
 	@units = :millimeter
     end
+
+    # @return [Rectangle]   A {Geometry::Rectangle} that bounds the {Gerber} image
+    def bounds
+	a = @layers.map {|layer| layer.bounds}
+	min_x, min_y, max_x, max_y = rectangle_minmax(a.shift)
+	a.each do |rectangle|
+	    minx, miny, maxx, maxy = rectangle_minmax(rectangle)
+	    min_x, max_x = [min_x, max_x, minx, maxx].minmax
+	    min_y, max_y = [min_y, max_y, miny, maxy].minmax
+	end
+	Rectangle.new min_x, min_y, max_x, max_y
+    end
+
+    def rectangle_minmax(rectangle)
+	points = rectangle.points
+	min_x, max_x = points.minmax_by(&:x)
+	min_y, max_y = points.minmax_by(&:y)
+	[min_x.x, min_y.y, max_x.x, max_y.y]
+    end
+    private :rectangle_minmax
+
+    # @return [Size]	The maximum dimensions of the {Gerber} image
+    def size
+	rectangle = self.bounds
+	Size[rectangle.width, rectangle.height]
+    end
 # @endgroup
 
 # @group Geometry

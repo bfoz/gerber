@@ -145,12 +145,12 @@ describe Gerber::Parser do
 
 			it "with a round hole" do
 			    parser.parse_parameter('ADD10P,0.030X4X0X0.040*')
-			    parser.apertures[10].must_equal(Gerber::Aperture.new(:polygon=>0.030.inch, :sides=>4, :rotation=>0.0, :hole=>0.040.inch))
+			    parser.apertures[10].must_equal(Gerber::Aperture.new(polygon:0.030.inch, sides:4, hole:0.040.inch))
 			end
 
 			it "with a square hole" do
 			    parser.parse_parameter('ADD10P,0.030X4X0X0.040X0.025*')
-			    parser.apertures[10].must_equal(Gerber::Aperture.new(:polygon=>0.030.inch, :sides=>4, :rotation=>0.0, :hole=>{:x=>0.040.inch,:y=>0.025.inch}))
+			    parser.apertures[10].must_equal(Gerber::Aperture.new(polygon:0.030.inch, sides:4, hole:{x:0.040.inch, y:0.025.inch}))
 			end
 		    end
 		end

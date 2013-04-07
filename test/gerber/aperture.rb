@@ -3,8 +3,56 @@ require 'gerber/aperture'
 
 describe Gerber::Aperture do
     Aperture = Gerber::Aperture
+    Rectangle = Aperture::Rectangle
+    Size = Aperture::Size
 
-    let(:aperture) { Aperture.new }
+    describe "when the aperture is a Circle" do
+	let(:aperture) { Aperture.new(circle:2) }
+
+	it "must have bounds" do
+	    aperture.bounds.must_equal Rectangle.new Size[2,2]
+	end
+
+	it "must have a size" do
+	    aperture.size.must_equal Size[2,2]
+	end
+    end
+
+    describe "when the aperture is an Obround" do
+	let(:aperture) { Aperture.new(obround:[2,4]) }
+
+	it "must have bounds" do
+	    aperture.bounds.must_equal Rectangle.new Size[2,4]
+	end
+
+	it "must have a size" do
+	    aperture.size.must_equal Size[2,4]
+	end
+    end
+
+    describe "when the aperture is a Polygon" do
+	let(:aperture) { Aperture.new(polygon:2, sides:6) }
+
+	it "must have bounds" do
+	    aperture.bounds.must_equal Rectangle.new Size[2,2]
+	end
+
+	it "must have a size" do
+	    aperture.size.must_equal Size[2,2]
+	end
+    end
+
+    describe "when the aperture is a Rectangle" do
+	let(:aperture) { Aperture.new(rectangle:[2,4]) }
+
+	it "must have bounds" do
+	    aperture.bounds.must_equal Rectangle.new Size[2,4]
+	end
+
+	it "must have a size" do
+	    aperture.size.must_equal Size[2,4]
+	end
+    end
 
     describe "when converted to a string" do
 	let(:circle_hole) { 0.02 }

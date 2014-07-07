@@ -16,4 +16,5 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
 
   gem.add_dependency  'geometry', '>= 6'
+    gem.add_dependency	'units', '~2'
 end
